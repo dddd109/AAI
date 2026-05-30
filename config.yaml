@@ -1,0 +1,60 @@
+# ============================================================
+# Anime-Agent-Infer Configuration
+# ============================================================
+
+# --- LLM API (Node A: Cloud Brain) ---
+llm:
+  provider: "deepseek"           # deepseek | anthropic | openai
+  api_key: "sk-your-deepseek-api-key"   # DeepSeek API key
+  api_base: "https://api.deepseek.com"  # DeepSeek endpoint
+  model: "deepseek-chat"         # deepseek-chat | deepseek-reasoner
+  max_tokens: 512
+  temperature: 0.7
+
+# --- TTS (Node B: Voice Server) ---
+tts:
+  mode: "api"                    # api(莲华原声,联网) | local(本地v4,离线) | mock(测试用)
+  # API mode — skytnt/moe-tts HuggingFace Space. 莲华本人声音, ~3-5s延迟, 需联网.
+  api:
+    character: "莲华"              # 角色名: 莲华/篝之雾枝/沢渡雫/亚璃子/灯露椎/覡夕莉
+    endpoint: "https://skytnt-moe-tts.hf.space"
+  # 本地模式 — VITS 微调模型 (训练完成后启用). 莲华本人声音, <1s延迟, 无需联网.
+  # Local inference
+  local:
+    python: "./.venv/Scripts/python.exe"      # Python 3.12 venv, torch 2.5.1+cu121
+    gpt_sovits_path: "./GPT-SoVITS"           # Path to GPT-SoVITS repo
+    model_path: "./莲华模型"                    # Path to model weights
+    gpt_weights: "G.莲华22240.pth"             # GPT model (Stage 1, text→semantic)
+    sovits_weights: "sovits_renge.pth"         # SoVITS Generator (Stage 2, semantic→audio, v1 format)
+    is_v1_format: true                         # Checkpoint is GPT-SoVITS v1 (needs v1 code)
+    device: "cuda"                             # cuda | cpu
+  # Remote inference (school server via Cloudflare Tunnel)
+  remote:
+    endpoint: "https://renge-tts.example.com" # Cloudflare Tunnel endpoint
+    timeout: 30
+
+# --- Audio I/O ---
+audio:
+  sample_rate: 44100              # Match model config (44.1kHz)
+  input_device: null              # null = system default
+  output_device: null             # null = system default
+  record_duration: 5              # Max recording seconds
+  silence_threshold: 0.01         # Auto-stop silence threshold
+
+# --- Tool Execution ---
+tool:
+  enabled: true
+  sandbox_mode: true              # Prompt before executing dangerous commands
+  claude_cli_path: "claude"       # Claude Code CLI command
+  timeout: 120                    # Max execution seconds
+
+# --- Character ---
+character:
+  name: "莲华"
+  card_file: "./character_card.txt"
+  language: "ja"                  # Japanese TTS output
+
+# --- Logging ---
+logging:
+  level: "INFO"                   # DEBUG | INFO | WARNING | ERROR
+  file: "./logs/agent.log"

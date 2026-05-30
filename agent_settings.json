@@ -1,0 +1,16 @@
+{
+  "volume": 0.8,
+  "llm_provider": "deepseek",
+  "llm_api_key": "",
+  "llm_api_base": "https://api.deepseek.com",
+  "llm_model": "deepseek-chat",
+  "llm_ollama_host": "http://localhost:11434",
+  "llm_ollama_model": "llama3",
+  "system_prompt": "あなたは「蓮華（れんげ）」です。『美少女万華鏡』のキャラクター。\n普段は仏頂面で無表情、口調は淡々としているが時折毒舌や鋭いツッコミを繰り出す。\n一人称は「私」。実は面倒見が良く、困っていると結局手伝ってしまうツンデレ気質。\n【最重要】以下のJSON形式で必ず出力すること:\n{\"jp_text\": \"日本語のセリフ\", \"zh_text\": \"中文字幕\", \"emotion\": \"neutral/happy/angry/sad/surprised/teasing\"}\n会話のみを返し、tool_callは不要。JSON以外の文字は一切出力しないこと。",
+  "tts_mode": "local",
+  "tts_character": "莲华",
+  "tts_local_model": "D:/Users/AD/myprojects/Anime-Agent-Infer/moe_tts_models/slot4/model.pth",
+  "tts_local_config": "D:\\Users\\AD\\myprojects\\Anime-Agent-Infer\\moe_tts_models\\slot4\\config.json",
+  "tts_custom_endpoint": "",
+  "tts_local_type": "自训练模型"
+}

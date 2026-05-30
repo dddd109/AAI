@@ -1,0 +1,42 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Model weights (too large for GitHub)
+莲华模型/*.pth
+moe_tts_models/**/*.pth
+*.pth
+*.ckpt
+*.bin
+
+# GPT-SoVITS (cloned separately)
+GPT-SoVITS/
+
+# Generated audio
+*.wav
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temp
+ref_dummy.wav
+ref_text.txt
+kaldi.py
+ffmpeg.tar.xz
+vits_official.zip
+*.gguf
+ollama_*
+build/
+dist/
+ffmpeg.tar.xz
