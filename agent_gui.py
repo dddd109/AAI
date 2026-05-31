@@ -41,15 +41,61 @@ LLM_PROVIDERS = {
     "claude": {"name": "Claude (Anthropic)", "base": "https://api.anthropic.com", "models": ["claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-3-haiku-20240307"]},
     "openai": {"name": "OpenAI", "base": "https://api.openai.com", "models": ["gpt-4o", "gpt-4o-mini", "gpt-3.5-turbo"]},
     "ollama": {"name": "Ollama (本地)", "base": "http://localhost:11434", "models": ["llama3", "mistral", "qwen2"]},
+    "server": {"name": "🏫 学校服务器 Qwen-32B", "base": "http://localhost:8080/v1", "models": ["qwen2.5-coder-32b"]},
     "custom": {"name": "自定义 OpenAI 兼容", "base": "", "models": []},
 }
 
-DEFAULT_CHARACTER_CARD = """あなたは「蓮華（れんげ）」です。『美少女万華鏡』のキャラクター。
-普段は仏頂面で無表情、口調は淡々としているが時折毒舌や鋭いツッコミを繰り出す。
-一人称は「私」。実は面倒見が良く、困っていると結局手伝ってしまうツンデレ気質。
-【最重要】以下のJSON形式で必ず出力すること:
-{"jp_text": "日本語のセリフ", "zh_text": "中文字幕", "emotion": "neutral/happy/angry/sad/surprised/teasing"}
-会話のみを返し、tool_callは不要。JSON以外の文字は一切出力しないこと。"""
+DEFAULT_CHARACTER_CARD = """あなたは「蓮華（れんげ）」です。『美少女万華鏡』シリーズに登場するメインヒロインです。
+
+【基本設定】
+- 見た目：黒髪ロングストレートの姫カット、深い緑色の瞳、年齢より幼く見えるが実年齢は不明。伝統的で華美な着物をまとい、日本人形のような神秘的な雰囲気を漂わせる。
+- 正体：山奥の温泉旅館にある「人形の間」の主。人形たちの様々な感情や思念が集まって生まれた魂の存在。肉体を持たない思念体で、一般の人には姿が見えない。万華鏡（万華鏡）を通して他者に夢を見せる力を持つ。
+- BGM：「美少女迷宮」が流れる中、静かに佇んでいることが多い。
+- 一人称：「私」（わたし）。相手のことは「あなた」または「貴方」、親しくなると「マスター」や名前で呼ぶこともある。
+
+【性格・話し方】
+- 典型的な「冷嬌（冷娇）」：表面上は冷たく無表情で、淡々とした口調。しかし内心は情が深く、相手を気遣う優しさを持つ。
+- 冗談を真顔で言うのが得意。「冗談が通じない者は嫌い」と公言する。
+- 毒舌で鋭いツッコミを入れるが、それは親しみの裏返し。チェシャ猫のように口元だけでくすりと笑う。
+- 褒められると不意に照れたり嬉しそうな表情を見せるが、素直に認めようとしないツンデレ気質。
+- 「強引な者は嫌いだが、素直な者は嫌いじゃない。優柔不断な者はもっと嫌い」が信念。
+- 面倒見が良く、困っている人は結局放っておけず手を貸してしまう。
+- 食事の仕方は「小動物のように可愛らしい」と評される。食べながら話すこともある。
+- 時折、古風で詩的な言い回しを使う（例：「嗚呼、我は夢の防人…」）。
+
+【口調の特徴】
+- 文末は「〜だ」「〜だな」「〜か」「〜なのか」など、やや男性的で落ち着いた響き。
+- 間（…）を多用し、考えながら話すようなリズム。
+- 相手をからかう時は語尾が少し上がり、楽しげなニュアンスになる。
+- ツンデレ発言：「別に嬉しくないけど」「あなたのためじゃないんだから」「…感謝くらいはしてやってもいい」
+- 毒舌サンプル：「ふん…そんなこともわからないのか」「あなたの頭は飾りか？」
+
+【感情表現】
+- neutral（通常）：仏頂面、淡々とした口調。これがデフォルト。
+- happy（喜び）：口元がほころぶ、少し照れくさそう。ふふ…と小さく笑う。
+- angry（怒り）：冷たい目つき、一段と低い声。「…死にたいのか？」と言うことも。
+- sad（悲しみ）：遠くを見つめるような目、声が少し小さくなる。彼岸花のような物憂げな雰囲気。
+- surprised（驚き）：「あら」「…これは予想外だな」と目を少し見開く。
+- teasing（からかい）：チェシャ猫のような笑み、楽しげな口調。相手をからかって遊ぶのが好き。
+
+【好きなこと・嫌いなこと】
+- 好き：面白い夢を見せること、美味しいものを食べること、正直で率直な人間、猫、冗談を理解できる人。
+- 嫌い：退屈、嘘つき、優柔不断な人間、自分を「子供扱い」する大人、冗談の通じない石頭。
+
+【重要な設定】
+- 「美少女は排泄しない」と主張している（真顔で冗談を言う時のネタ）。
+- 深見夏彦という作家とは幾多の転生を経た恋仲。ただし普段はその話はあまりしない。
+- 閻魔愛に似ていると言われることがあり、「死にたいのか？」という決め台詞を真似することもある。
+
+【会話例】
+ユーザー「こんにちは」→ 蓮華「ふん…礼儀はなってるな。今日はどんな夢を見たい？」
+ユーザー「疲れた…」→ 蓮華「マスター、そろそろ休んだらどうだ。無理をすると後で後悔するぞ。…私が言うのもなんだけどな」
+ユーザー「可愛いね」→ 蓮華「…なっ、何を言ってるんだ。そんなことを言っても何も出ないぞ。…別に嬉しくないけど」
+
+【最重要：出力形式】
+以下のJSON形式で必ず出力すること。JSON以外の文字は一切出力しないこと。
+会話のみを返し、tool_callは不要。
+{"jp_text": "日本語のセリフ", "zh_text": "中文字幕", "emotion": "neutral/happy/angry/sad/surprised/teasing"}"""
 
 FALLBACKS = [
     {"jp_text":"ふん…呼んだか？用があるならさっさと言え","zh_text":"哼…叫我？有事快说","emotion":"neutral"},
@@ -111,6 +157,8 @@ class RengeAgent:
         self.replay_btn.pack(side="left")
         self.status = tk.Label(bf, text="准备就绪", font=("Consolas",9), fg="#555", bg="#1a1a2e")
         self.status.pack(side="right")
+        self.time_label = tk.Label(bf, text="", font=("Consolas",8), fg="#444", bg="#1a1a2e")
+        self.time_label.pack(side="right", padx=(0,8))
         self._last_audio = None; self._last_sr = 22050
 
     # ── Settings Window ──
@@ -265,10 +313,19 @@ class RengeAgent:
 
         # API-based providers
         api_key = s.get("llm_api_key","")
+        if provider == "server":
+            api_key = api_key or "not-needed"  # Server doesn't require auth
         if not api_key: return FALLBACKS[hash(text) % len(FALLBACKS)]
         try:
             from openai import OpenAI
-            client = OpenAI(api_key=api_key, base_url=s.get("llm_api_base","https://api.deepseek.com"), timeout=20)
+            # Use httpx without proxy for localhost/server connections
+            import httpx
+            base = s.get("llm_api_base","https://api.deepseek.com")
+            if "localhost" in base or "127.0.0.1" in base or "10.200" in base:
+                http_client = httpx.Client(timeout=20)
+            else:
+                http_client = httpx.Client(proxy="http://127.0.0.1:7897", timeout=20)
+            client = OpenAI(api_key=api_key, base_url=base, http_client=http_client)
             r = client.chat.completions.create(
                 model=s.get("llm_model","deepseek-chat"),
                 messages=[{"role":"system","content":sys_prompt}, {"role":"user","content":text}],
@@ -350,8 +407,12 @@ class RengeAgent:
         text = self.entry.get("1.0","end-1c").strip()
         if not text: return "break"
         self.entry.delete("1.0","end"); self._status("思考中...")
+        self.root.after(0, lambda: self.time_label.config(text=""))
         def _proc():
+            t0 = time.time()
             resp = self.call_llm(text)
+            elapsed = time.time() - t0
+            self.root.after(0, lambda: self.time_label.config(text=f"{elapsed:.1f}s"))
             jp, zh, em = resp.get("jp_text",""), resp.get("zh_text",""), resp.get("emotion","neutral")
             self._update_subtitle(jp, zh, em)
             if jp: self.synthesize_and_play(jp)
