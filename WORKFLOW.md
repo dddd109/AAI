@@ -30,8 +30,10 @@
 │  └─ 按需启动 llama.cpp → 5分钟空闲  │
 │     自动卸载 GPU                     │
 │                                     │
-│  vits_finetune/train_genonly.py     │
-│  └─ 3670 条莲华数据, 300 epochs     │
+│  vits_finetune/ (tmux session)      │
+│  ├─ train_genonly.py                │
+│  └─ 3303 条, segment=16384 (0.75s)  │
+│      batch=2, ~3.6it/s, 300 epochs  │
 └─────────────────────────────────────┘
 ```
 
@@ -63,11 +65,20 @@
 
 - **关键发现**: 训练音频未归一化 (int16 范围 → 需要 `a / 32768`)
 - **数据解析 bug**: `split('|', 1)` → 文本含 `0|` 前缀
-- 修复后 loss 从 ~260 降到 ~22 (正常范围)
+- **Duration 问题**: segment_size=8192 (0.37s) 太短，长句硬塞导致语速 3x 加速 → 改为 16384 (0.75s) + 随机裁剪
+- 修复后 loss 从 ~260 降到 ~17 (正常范围)
 - 实现 LLM 懒加载: 有请求时启动，5分钟无请求自动释放 GPU
 - 角色卡升级: 基于萌娘百科详细人设，1745 字日文系统提示
 - GUI 添加推理计时器
 - LLM provider 添加 "学校服务器 Qwen-32B" 一键选项
+- **训练改为 tmux 运行**，SSH 断开不中断
+
+### Day 6 (06-01): 稳定性改进
+
+- 服务器代码同步到 GitHub (`server/` 目录)
+- 尝试 Ollama (需 sudo, 放弃) → 改用自建 lazy_server.py
+- SSH 隧道简化: 移除自动 LocalForward，按需使用 `ssh -f -N gdut-tunnel`
+- 训练适配: segment_size 增大避免 duration 压缩，随机裁剪增加多样性
 
 ---
 
@@ -113,9 +124,11 @@ Claude Code (需代理):
 |------|------|
 | 代码 | `~/vits_finetune/train_genonly.py` (generator-only, 无判别器) |
 | 基模型 | skytnt slot 4 model.pth (455MB, 6 角色, 41 音素) |
-| 数据 | 3,670 条莲华 (游戏1-5), 22050Hz WAV |
-| 参数 | batch=4, lr=2e-4, AdamW, ExponentialLR(0.999875), 300 epochs |
-| GPU | GPU 2 (Quadro RTX 8000 48GB), ~4 it/s, ~3.5min/epoch |
+| 数据 | 3,303 条莲华 (游戏1-5), 22050Hz WAV |
+| 参数 | batch=2, lr=2e-4, AdamW, ExponentialLR(0.999875), 300 epochs |
+| Segment | 16384 样本 (0.75s), 随机裁剪 |
+| GPU | GPU 2 (Quadro RTX 8000 48GB), ~3.6 it/s, ~7.5min/epoch |
+| 进程管理 | **tmux** (session: `vits`), SSH 断开不中断 |
 | Checkpoint | 每 30 epoch 保存到 `output_gen/ft_e30.pth` |
 
 ### 发现并修复的关键 Bug
@@ -152,8 +165,12 @@ Claude Code (需代理):
 ### 监控命令
 
 ```bash
-# 训练进度
-ssh gdut "grep 'E[0-9]*: avg' ~/vits_finetune/train_gen.log | tail -5"
+# 训练进度 (tmux)
+ssh gdut "tmux capture-pane -t vits -p | grep 'E[0-9]*: avg'"
+
+# 实时查看训练
+ssh gdut -t tmux attach -t vits
+# (Ctrl+B D 退出但不中断训练)
 
 # GPU 状态
 ssh gdut "nvidia-smi --query-gpu=index,memory.used --format=csv,noheader"

@@ -27,23 +27,28 @@ model.load_state_dict(st, strict=False)
 model = model.to(dev).train()
 print(f'Model: {sum(p.numel() for p in model.parameters())/1e6:.1f}M')
 
+MAX_TEXT_LEN = 60  # Filter texts too long for 0.37s segment (8192/256=32 frames)
 class DS(torch.utils.data.Dataset):
     def __init__(self, fl):
-        with open(fl, encoding='utf-8') as f:
-            self.d = [(p[0], p[2]) if len(p:=l.strip().split('|', 2)) >= 3 else (p[0], p[1]) for l in f if l.strip() and '|' in l]
+        with open(fl, encoding="utf-8") as f:
+            self.d = [(p[0], p[2]) if len(p:=l.strip().split("|", 2)) >= 3 else (p[0], p[1]) for l in f if l.strip() and "|" in l]
+        print(f"Dataset: {len(self.d)} samples")
     def __len__(self): return len(self.d)
     def __getitem__(self, i):
         p, t = self.d[i][0], self.d[i][1]
         a, sr = utils.load_wav_to_torch(p); a = a / hps["data"]["max_wav_value"]  # normalize to [-1,1]
-        SR = hps['data']['sampling_rate']
+        SR = hps["data"]["sampling_rate"]
         if sr != SR:
-            a = torch.from_numpy(__import__('librosa').resample(a.numpy(), orig_sr=sr, target_sr=SR)).float()
-        seg = hps['train']['segment_size']
-        a = a[:seg] if a.size(0) >= seg else torch.nn.functional.pad(a, (0, seg - a.size(0)))
-        seq = text_to_sequence(t, sym, hps['data']['text_cleaners'])
-        if hps['data']['add_blank']: seq = commons.intersperse(seq, 0)
+            a = torch.from_numpy(__import__("librosa").resample(a.numpy(), orig_sr=sr, target_sr=SR)).float()
+        seg = hps["train"]["segment_size"]
+        if a.size(0) >= seg:
+            start = torch.randint(0, a.size(0) - seg + 1, (1,)).item()
+            a = a[start:start+seg]
+        else:
+            a = torch.nn.functional.pad(a, (0, seg - a.size(0)))
+        seq = text_to_sequence(t, sym, hps["data"]["text_cleaners"])
+        if hps["data"]["add_blank"]: seq = commons.intersperse(seq, 0)
         return torch.LongTensor(seq), a
-
 def coll(batch):
     mx = max(len(x[0]) for x in batch)
     xp = torch.zeros(len(batch), mx, dtype=torch.long)
@@ -51,7 +56,7 @@ def coll(batch):
     return xp, torch.LongTensor([len(x[0]) for x in batch]), torch.stack([x[1] for x in batch]), torch.zeros(len(batch), dtype=torch.long)
 
 ds = DS('/home/stu001/vits_finetune/filelists/renge_train.txt')
-dl = DataLoader(ds, batch_size=4, shuffle=True, collate_fn=coll, drop_last=True)
+dl = DataLoader(ds, batch_size=2, shuffle=True, collate_fn=coll, drop_last=True)
 print(f'Train: {len(ds)}, batches: {len(dl)}')
 
 opt = torch.optim.AdamW(model.parameters(), lr=2e-4, betas=[0.8,0.99], eps=1e-9)
